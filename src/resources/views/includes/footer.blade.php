@@ -24,5 +24,6 @@
   </div>
 
   <!-- Default to the left -->
-  <strong>{{ trans('web::seat.copyright') }} &copy; {{ date('Y') }} | <a href="https://github.com/eveseat/seat" target="_blank">SeAT</a></strong>
+  <!-- strong>{{ trans('web::seat.copyright') }} &copy; {{ date('Y') }} | <a href="https://github.com/eveseat/seat" target="_blank">SeAT</a></strong -->
+  <strong><a href="https://beian.miit.gov.cn/" target="_blank">琼ICP备18003880号-3</a></strong>
 </footer>
