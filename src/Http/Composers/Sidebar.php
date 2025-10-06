@@ -60,6 +60,10 @@ class Sidebar extends AbstractMenu
         // Grab any custom links.
         $custom_links = setting('customlinks', true) ?: [];
 
+        // Sort the menu.
+        ksort($menu);
+
+        // Add custom links to the end of the menu
         foreach($custom_links as $node) {
 
             // Build our menu node
@@ -73,9 +77,6 @@ class Sidebar extends AbstractMenu
                 'new_tab' => $node->new_tab,
             ];
         }
-
-        // Sort the menu.
-        ksort($menu);
 
         // Return the sidebar with the loaded packages menus
         $view->with('menu', collect($menu)->map(function ($menu_data, $package_name) {
