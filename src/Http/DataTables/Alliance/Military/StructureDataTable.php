@@ -115,10 +115,8 @@ class StructureDataTable extends DataTable
      */
     public function query()
     {
-        $corporationIds = $this->alliance->corporations()->pluck('corporation_id');
-
-        return CorporationStructure::with('info', 'type', 'solar_system', 'services', 'corporation')
-            ->whereIn('corporation_id', $corporationIds);
+        return $this->alliance->structures()
+            ->with('info', 'type', 'solar_system', 'services', 'corporation');
     }
 
     /**

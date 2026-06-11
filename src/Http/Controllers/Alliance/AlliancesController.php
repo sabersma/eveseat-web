@@ -183,9 +183,9 @@ class AlliancesController extends Controller
     {
         $this->authorizeAllianceStructures($alliance);
 
-        $structure = CorporationStructure::with('info', 'type', 'services', 'items', 'items.type', 'items.type.dogma_attributes', 'solar_system', 'corporation')
-            ->where('structure_id', $structure_id)
-            ->whereIn('corporation_id', $alliance->corporations()->pluck('corporation_id'))
+        $structure = $alliance->structures()
+            ->with('info', 'type', 'services', 'items', 'items.type', 'items.type.dogma_attributes', 'solar_system', 'corporation')
+            ->where('corporation_structures.structure_id', $structure_id)
             ->first();
 
         if (! $structure)
