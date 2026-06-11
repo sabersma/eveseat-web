@@ -25,10 +25,14 @@ namespace Seat\Web\Http\Controllers\Alliance;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Seat\Eveapi\Models\Alliances\Alliance;
+use Seat\Eveapi\Models\Character\CharacterRole;
+use Seat\Eveapi\Models\Corporation\CorporationStructure;
+use Seat\Eveapi\Models\RefreshToken;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Web\Http\DataTables\Alliance\AllianceDataTable;
 use Seat\Web\Http\DataTables\Alliance\Intel\ContactDataTable;
 use Seat\Web\Http\DataTables\Alliance\Intel\TrackingDataTable;
+use Seat\Web\Http\DataTables\Alliance\Military\StructureDataTable;
 use Seat\Web\Http\DataTables\Scopes\AllianceScope;
 use Seat\Web\Http\DataTables\Scopes\Filters\ContactCategoryScope;
 use Seat\Web\Http\DataTables\Scopes\Filters\ContactStandingLevelScope;
@@ -155,5 +159,72 @@ class AlliancesController extends Controller
     {
         return $dataTable->addScope(new AllianceScope('alliance.tracking', [$alliance->alliance_id]))
             ->render('web::alliance.tracking', compact('alliance'));
+    }
+
+    /**
+     * @param  \Seat\Eveapi\Models\Alliances\Alliance  $alliance
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function showStructures(Alliance $alliance)
+    {
+        $this->authorizeAllianceStructures($alliance);
+
+        $dataTable = app(StructureDataTable::class, ['alliance' => $alliance]);
+
+        return $dataTable->render('web::alliance.structures.list', compact('alliance'));
+    }
+
+    /**
+     * @param  \Seat\Eveapi\Models\Alliances\Alliance  $alliance
+     * @param  int  $structure_id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function showStructure(Alliance $alliance, int $structure_id)
+    {
+        $this->authorizeAllianceStructures($alliance);
+
+        $structure = CorporationStructure::with('info', 'type', 'services', 'items', 'items.type', 'items.type.dogma_attributes', 'solar_system', 'corporation')
+            ->where('structure_id', $structure_id)
+            ->whereIn('corporation_id', $alliance->corporations()->pluck('corporation_id'))
+            ->first();
+
+        if (! $structure)
+            abort(404);
+
+        return view('web::alliance.structures.modals.fitting.content', compact('alliance', 'structure'));
+    }
+
+    /**
+     * Check if the current user can view alliance structures.
+     * Allowed: SeAT superuser, or CEO/Director of the executor corporation.
+     *
+     * @param  \Seat\Eveapi\Models\Alliances\Alliance  $alliance
+     * @return void
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     */
+    private function authorizeAllianceStructures(Alliance $alliance): void
+    {
+        // 1. Superuser / admin
+        if (auth()->user()->isAdmin() || Gate::allows('global.superuser'))
+            return;
+
+        // 2. Executor corp CEO or Director
+        $executorCorpId = $alliance->executor_corporation_id;
+
+        if ($executorCorpId) {
+            $userCharacterIds = RefreshToken::where('user_id', auth()->id())
+                ->pluck('character_id');
+
+            $hasRole = CharacterRole::whereIn('character_id', $userCharacterIds)
+                ->where('corporation_id', $executorCorpId)
+                ->whereIn('role', ['ceo', 'director'])
+                ->exists();
+
+            if ($hasRole)
+                return;
+        }
+
+        abort(403, sprintf('Request to %s was denied. Only the Executor corporation CEO, Directors, or SeAT administrators may view alliance structures.', request()->path()));
     }
 }

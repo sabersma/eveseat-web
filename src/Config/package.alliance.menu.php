@@ -42,4 +42,12 @@ return [
         'highlight_view' => 'tracking',
         'route' => 'seatcore::alliance.view.tracking',
     ],
+    [
+        'name' => 'structures',
+        'label' => 'web::seat.structure',
+        'plural' => true,
+        'permission' => 'alliance.structure',
+        'highlight_view' => 'structures',
+        'route' => 'seatcore::alliance.view.structures',
+    ],
 ];

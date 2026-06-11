@@ -46,3 +46,11 @@ Route::get('/{alliance}/tracking')
     ->name('seatcore::alliance.view.tracking')
     ->uses('AlliancesController@showTracking')
     ->middleware('can:alliance.tracking,alliance');
+
+Route::get('/{alliance}/structures')
+    ->name('seatcore::alliance.view.structures')
+    ->uses('AlliancesController@showStructures');
+
+Route::get('/{alliance}/structures/{structure_id}')
+    ->name('seatcore::alliance.view.structures.show')
+    ->uses('AlliancesController@showStructure');

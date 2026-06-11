@@ -34,4 +34,9 @@ return [
         'label' => 'web::permissions.alliance_tracking_label',
         'description' => 'web::permissions.alliance_tracking_description',
     ],
+    'structure' => [
+        'label' => 'web::permissions.alliance_structure_label',
+        'description' => 'web::permissions.alliance_structure_description',
+        'division' => 'assets',
+    ],
 ];
