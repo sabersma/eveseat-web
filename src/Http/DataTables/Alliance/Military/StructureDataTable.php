@@ -59,11 +59,10 @@ class StructureDataTable extends DataTable
         return datatables()
             ->eloquent($this->applyScopes($this->query()))
             ->editColumn('corporation.name', function ($row) {
-                return view('web::partials.link', [
-                    'route' => 'seatcore::corporation.view.default',
-                    'params' => ['corporation' => $row->corporation_id],
-                    'label' => $row->corporation->name,
-                ])->render();
+                return sprintf('<a href="%s">%s</a>',
+                    route('seatcore::corporation.view.default', ['corporation' => $row->corporation_id]),
+                    $row->corporation->name
+                );
             })
             ->editColumn('type.typeName', function ($row) {
                 return view('web::partials.type', ['type_id' => $row->type->typeID, 'type_name' => $row->type->typeName])->render();
